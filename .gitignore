@@ -1,0 +1,41 @@
+# 编译输出
+/spider
+/spider.exe
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 临时构建文件
+/bin/
+/dist/
+
+# 测试文件
+*.test
+*.out
+
+# 输出目录
+output/
+test_output/
+downloaded/
+
+# Go 工作空间文件
+go.work
+
+# IDE 文件
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Claude Code
+.claude/
+.claude-memory/
+
+# 报告文件
+report.txt
