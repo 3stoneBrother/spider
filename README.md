@@ -1,144 +1,107 @@
-# Spider - 浏览器模拟爬虫工具
+# Spider - Browser-Based Web Crawler
 
-一个基于 Go 语言和 chromedp 开发的网页爬虫工具，可以模拟真实浏览器加载网页，执行 JavaScript 代码，并抓取所有动态加载的资源。
+[中文文档](README_CN.md)
 
-## 功能特性
+A web crawler tool built with Go and chromedp that simulates real browser behavior, executes JavaScript, and captures all dynamically loaded resources.
 
-- ✅ 模拟真实浏览器行为
-- ✅ 执行 JavaScript 动态加载的内容
-- ✅ 拦截并保存所有网络请求的资源
-- ✅ **自动提取 Source Maps 中的源代码文件**
-- ✅ 按域名和路径组织文件树结构（类似 Chrome DevTools）
-- ✅ 页面自动滚动以触发懒加载资源
-- ✅ 生成详细的抓取报告
-- ✅ 支持自定义超时时间
-- ✅ 保存资源元数据信息
+## Features
 
-## 系统要求
+- Simulates real browser behavior
+- Executes JavaScript and captures dynamically loaded content
+- Intercepts and saves all network request resources
+- **Automatically extracts source code from Source Maps**
+- Organizes files by domain and path (like Chrome DevTools)
+- Auto-scrolls pages to trigger lazy-loaded resources
+- Generates detailed crawl reports
+- Supports Cookie, custom Headers, and proxy
+- Supports batch URL crawling with concurrency
 
-### 必需组件
+## Requirements
 
-1. **Go 1.19+** - 编译和运行程序
-2. **Chrome 或 Chromium 浏览器** - chromedp 需要使用
+1. **Go 1.19+** - For building and running
+2. **Chrome or Chromium** - Required by chromedp
 
-### 安装 Chrome/Chromium
+### Install Chrome/Chromium
 
-#### macOS
+**macOS:**
 ```bash
-# 使用 Homebrew 安装
 brew install --cask google-chrome
-
-# 或安装 Chromium
+# or
 brew install --cask chromium
 ```
 
-#### Linux (Ubuntu/Debian)
+**Linux (Ubuntu/Debian):**
 ```bash
-# 安装 Chromium
 sudo apt-get update
 sudo apt-get install chromium-browser
-
-# 或安装 Chrome
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo dpkg -i google-chrome-stable_current_amd64.deb
 ```
 
-#### Windows
-从官网下载安装: https://www.google.com/chrome/
+**Windows:**
+Download from: https://www.google.com/chrome/
 
-## 项目结构
-
-```
-spider/
-├── cmd/
-│   └── spider/
-│       └── main.go          # 主程序入口
-├── internal/
-│   ├── crawler/
-│   │   └── crawler.go       # 爬虫核心逻辑
-│   ├── storage/
-│   │   └── storage.go       # 文件存储管理
-│   └── sourcemap/
-│       └── sourcemap.go     # Source Map 处理
-├── go.mod
-├── go.sum
-└── README.md
-```
-
-## 安装和构建
-
-### 使用 Make（推荐）
+## Installation
 
 ```bash
-# 查看可用命令
-make help
-
-# 安装依赖
-make deps
-
-# 编译程序
-make build
-
-# 清理
-make clean
-```
-
-### 手动构建
-
-```bash
-# 克隆或下载项目
+# Clone the repository
+git clone https://github.com/3stoneBrother/spider.git
 cd spider
 
-# 下载依赖
-go mod tidy
-
-# 编译程序
+# Build
 go build -o spider ./cmd/spider
 
-# 运行
-./spider -help
+# Or use Make
+make build
 ```
 
-## 使用方法
+## Usage
 
-### 基本用法
+```
+spider -url <target-url> [options]
+spider -file <url-file> [options]
+```
+
+### Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-url` | Target URL (mutually exclusive with -file) | - |
+| `-file` | File containing URLs, one per line (mutually exclusive with -url) | - |
+| `-output` | Output directory | `./output` |
+| `-timeout` | Crawl timeout in seconds | `30` |
+| `-cookie` | Cookie string, format: `"key1=value1; key2=value2"` | - |
+| `-header` | Custom header, format: `"Key:Value"` (can be used multiple times) | - |
+| `-proxy` | HTTP/SOCKS5 proxy address, e.g., `"http://127.0.0.1:8080"` | - |
+| `-ua` | Custom User-Agent | - |
+| `-concurrency` | Concurrency level for batch crawling | `1` |
+| `-headless` | Headless mode | `true` |
+| `-help` | Show help message | - |
+
+### Examples
 
 ```bash
-# 爬取指定网页
-./spider -url https://example.com
+# Basic usage
+spider -url https://example.com
 
-# 指定输出目录
-./spider -url https://example.com -output ./mysite
+# With cookies
+spider -url https://example.com -cookie "session=abc123; token=xyz"
 
-# 设置超时时间（秒）
-./spider -url https://example.com -timeout 60
+# Custom headers
+spider -url https://example.com -header "Authorization:Bearer token" -header "X-Custom:value"
+
+# Using proxy
+spider -url https://example.com -proxy http://127.0.0.1:8080
+
+# Batch crawling
+spider -file urls.txt -concurrency 3
+
+# Visual mode (for debugging)
+spider -url https://example.com -headless=false
+
+# Custom output directory and timeout
+spider -url https://example.com -output ./mysite -timeout 60
 ```
 
-### 命令行参数
-
-| 参数 | 说明 | 默认值 |
-|------|------|--------|
-| -url | 目标网页URL（必需） | - |
-| -output | 输出目录 | ./output |
-| -timeout | 爬取超时时间（秒） | 30 |
-| -help | 显示帮助信息 | - |
-
-### 使用示例
-
-```bash
-# 爬取一个简单网页
-./spider -url https://example.com
-
-# 爬取一个复杂的单页应用
-./spider -url https://react-app.com -timeout 60
-
-# 爬取并保存到指定目录
-./spider -url https://mysite.com -output ./downloaded/mysite
-```
-
-## 输出结构
-
-抓取完成后，资源会按以下结构保存：
+## Output Structure
 
 ```
 output/
@@ -152,84 +115,77 @@ output/
 │   │   ├── app.js
 │   │   └── app.js.meta
 │   └── images/
-│       ├── logo.png
-│       └── logo.png.meta
+│       └── logo.png
 ├── cdn.example.com/
 │   └── library.js
 └── report.txt
 ```
 
-- 每个资源文件旁边会有一个 `.meta` 文件，包含该资源的元数据
-- `report.txt` 包含完整的抓取报告
+## Source Maps Support
 
-## 工作原理
+The crawler automatically detects Source Map references (`//# sourceMappingURL=...`) in JavaScript and CSS files:
 
-1. **启动 Headless Chrome**: 使用 chromedp 启动无头浏览器
-2. **页面加载与滚动**: 自动滚动页面以触发懒加载资源
-3. **拦截网络请求**: 监听所有网络事件（EventResponseReceived）
-4. **获取响应内容**: 通过 Chrome DevTools Protocol 获取响应体
-5. **提取 Source Maps**: 自动检测并下载 .map 文件，提取原始源代码
-6. **保存资源**: 按域名和路径结构保存到本地文件系统
-7. **生成报告**: 统计并生成详细的抓取报告
+1. Downloads the corresponding `.map` files
+2. Parses Source Map JSON format
+3. Extracts all original source files (React components, modules, etc.)
+4. Preserves the complete source code directory structure
 
-## Source Maps 支持
-
-爬虫会自动检测 JavaScript 和 CSS 文件中的 Source Map 引用（`//# sourceMappingURL=...`），并：
-
-1. 下载对应的 `.map` 文件
-2. 解析 Source Map JSON 格式
-3. 提取所有原始源代码文件（包括 React 组件、模块等）
-4. 保存完整的源代码文件树结构（src/, components/, modules/ 等）
-
-这样你可以获得：
-- 完整的源代码文件（.js, .jsx, .ts, .tsx 等）
-- 样式源文件（.scss, .sass, .less 等）
-- 完整的项目目录结构
-
-示例输出结构：
+Output example with Source Maps:
 ```
 output/
 └── example.com/
     ├── src/
     │   ├── components/
     │   ├── modules/
-    │   ├── store/
-    │   └── routes/
+    │   └── store/
     ├── static/
     │   ├── js/
     │   └── css/
     └── assets/
 ```
 
-## 注意事项
+## How It Works
 
-1. 确保系统中已安装 Chrome 或 Chromium 浏览器
-2. 某些网站可能有反爬虫机制，请合理使用
-3. 大型网站可能需要较长的加载时间，建议适当增加 timeout 值
-4. 程序会等待额外时间以确保异步资源加载完成
-5. 遵守目标网站的 robots.txt 和使用条款
+1. **Launch Headless Chrome** - Uses chromedp to start a headless browser
+2. **Page Loading & Scrolling** - Auto-scrolls to trigger lazy-loaded resources
+3. **Network Interception** - Monitors all network events (EventResponseReceived)
+4. **Response Capture** - Gets response bodies via Chrome DevTools Protocol
+5. **Source Map Extraction** - Detects and downloads .map files, extracts source code
+6. **Resource Storage** - Saves to local filesystem organized by domain and path
+7. **Report Generation** - Creates detailed crawl statistics report
 
-## 技术栈
+## Project Structure
 
-- **Go**: 主要编程语言
-- **chromedp**: Chrome DevTools Protocol 的 Go 实现
-- **net/http**: HTTP 客户端（备用下载）
+```
+spider/
+├── cmd/
+│   └── spider/
+│       └── main.go          # Entry point
+├── internal/
+│   ├── crawler/
+│   │   ├── crawler.go       # Core crawler logic
+│   │   └── config.go        # Configuration
+│   ├── storage/
+│   │   └── storage.go       # File storage management
+│   └── sourcemap/
+│       └── sourcemap.go     # Source Map processing
+├── go.mod
+├── go.sum
+├── Makefile
+└── README.md
+```
 
-## 常见问题
+## Notes
 
-### Q: 提示 "chrome failed to start"
-A: 请确保系统中已安装 Chrome 或 Chromium 浏览器。
+1. Ensure Chrome or Chromium is installed on your system
+2. Some websites may have anti-crawler mechanisms, use responsibly
+3. Large websites may require longer timeout values
+4. Respect target website's robots.txt and terms of service
 
-### Q: 抓取的资源不完整
-A: 可以尝试增加 timeout 值，给予网页更多加载时间。
-
-### Q: 某些资源下载失败
-A: 这是正常现象，某些资源可能因为跨域、权限等原因无法获取。程序会继续处理其他资源。
-
-## 许可证
+## License
 
 MIT License
 
-## 贡献
+## Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Issues and Pull Requests are welcome!
