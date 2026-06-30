@@ -1,4 +1,4 @@
-# 编译输出（根目录二进制，不影响 cmd/spider/ 源码目录）
+# 编译输出
 /spider
 /spider.exe
 *.exe
@@ -6,8 +6,9 @@
 *.dll
 *.so
 *.dylib
+main
 
-# 临时构建文件
+# 构建产物
 /bin/
 /dist/
 
@@ -26,27 +27,20 @@ go.work
 # IDE 文件
 .idea/
 .vscode/
+.claude/
+.claude-memory/
+.omc/
 *.swp
 *.swo
 *~
 
-# macOS
+# 系统文件
 .DS_Store
 
-# 旧编译产物
-main
-
-# 项目备份/快照目录
+# 本地目录
+image/
 repo/
-
-# IDE / 工具目录
-.claude/
-.claude-memory/
-.omc/
-
-# 个人文件
 AGENTS.md
-需求.md
 
 # 报告文件
 report.txt
